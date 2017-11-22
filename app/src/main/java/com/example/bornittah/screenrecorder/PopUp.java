@@ -14,5 +14,6 @@ public class PopUp extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         Toast.makeText(context,"Recording ended", Toast.LENGTH_LONG).show();
       //  Toast.makeText(context,"Recording stop",Toast.LENGTH_LONG).show();
+
     }
 }

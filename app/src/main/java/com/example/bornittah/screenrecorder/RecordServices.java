@@ -30,12 +30,14 @@ public class RecordServices extends Service {
     private int dpi;
     @Nullable
     @Override
+
     public IBinder onBind(Intent intent) {
         return new RecordBinder();
 
     }
-    public int onStartCommand(Intent intent, int flags, int startId){
 
+    public int onStartCommand(Intent intent, int flags, int startId){
+        //START_STICKY the service will be restarted if it gets terminated whether their pending intents or not.
         return START_STICKY;
     }
     public void onCreate(){
@@ -84,7 +86,7 @@ public class RecordServices extends Service {
             return true;
         }
 
-
+//createVitualDisplay() Renders the surface provided by the application
     public void createVitualDisplay() {
         virtualDisplay=mediaProjection.createVirtualDisplay("mainScreen", width, height, dpi,
                 DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR, mediaRecorder.getSurface(),null, null);

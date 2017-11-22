@@ -7,7 +7,9 @@ import android.content.Intent;
 /**
  * Created by Bornittah on 11/17/2017.
  */
-
+/*The application class is called when the application is stating, before any other application object is created.
+it contains compenets such as activities,servises and disk storage
+ */
 public class RecordApplication extends Application {
 
     public static RecordApplication application;

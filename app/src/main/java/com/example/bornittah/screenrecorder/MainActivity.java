@@ -1,6 +1,7 @@
 package com.example.bornittah.screenrecorder;
 
 import android.Manifest;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
@@ -19,6 +20,8 @@ import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.content.ContextCompat;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -56,6 +59,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private VirtualDisplay virtualDisplay;
     private MediaRecorder mediaRecorder;
     private Context context;
+    private int notificationID = 100;
 
     boolean isRecording = false;
     FloatingActionButton fab;
@@ -68,50 +72,64 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 //toolbar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-/*
-        Intent intentbroadcast = new Intent(this, PopUp.class);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this.getApplicationContext(), 1, intentbroadcast, 0);
-        MediaProjectionManager projection = (MediaProjectionManager)getSystemService(MEDIA_PROJECTION_SERVICE);
-       // projection.(MediaProjectionManager.,System.currentTimeMillis()+(7*1000),pendingIntent);
-        Toast.makeText(this,"Recording started",Toast.LENGTH_LONG).show();
-        */
 
+
+        // Invoking the default notification service
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this);
+//setting properties of a notification
+        mBuilder.setSmallIcon(R.drawable.iconn);
+        mBuilder.setContentTitle("Screen Recorder!");
+        mBuilder.setContentText("Tap here to stop recording!");
+
+        // Creates an explicit intent for an Activity in your app
+        Intent resultIntent = new Intent(this, MainActivity.class);
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+        stackBuilder.addParentStack(MainActivity.class);
+
+
+        //Adds the Intent that starts the Activity to the top of the stack
+        stackBuilder.addNextIntent(resultIntent);
+        PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+        mBuilder.setContentIntent(resultPendingIntent);
+
+        NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+// notificationID allows you to update the notification later on.
+        mNotificationManager.notify(notificationID, mBuilder.build());
 
 
 //floating action button
         fab = (FloatingActionButton) findViewById(R.id.actionButton);
         fab.setEnabled(false);
+        //creating instance of MediaProjectionManager
         projectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (recordService.isRunning()) {
                     recordService.stopRecord();
-                  // Toast.makeText(context,"Recording started", Toast.LENGTH_LONG).show();
-                    //broadcast custom intent
+
                     Intent intent = new Intent();
-                    intent.setAction("com.screenRecorder.CUSTOM_INTENT"); sendBroadcast(intent);
+                    intent.setAction("com.screenRecorder.CUSTOM_INTENT");
+                    sendBroadcast(intent);
 
                 } else {
                     Intent captureIntent = projectionManager.createScreenCaptureIntent();
                     startActivityForResult(captureIntent, RECORD_REQUEST_CODE);
-                   // Toast.makeText(context,"Recording stopped", Toast.LENGTH_LONG).show();
+
                 }
 
-
-              //  Snackbar.make(view, "Recording started", Snackbar.LENGTH_LONG).setAction("Action", null).show();
 
             }
         });
 
-
+//checkSelfPermission determines whether permissions are granted and the requestPermission request permission to be granted to the application.
         if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, STORAGE_REQUEST_CODE);
         }
         if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, AUDIO_REQUEST_CODE);
         }
-
+//bindService() obtains a persistence connection to a service.
         Intent intent = new Intent(this, RecordServices.class);
         bindService(intent, connection, BIND_AUTO_CREATE);
 
